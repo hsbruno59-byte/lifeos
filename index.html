@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LifeOS">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0B0D10">
+  <title>LifeOS — Sistema Operacional Pessoal</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="./assets/icons/logo.svg">
+  <link rel="apple-touch-icon" href="./assets/icons/logo.svg">
+
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/responsive.css">
+</head>
+<body>
+  <section id="onboarding-screen" class="onboarding-overlay hidden" aria-label="Configuração Inicial">
+    <div class="onboarding-card">
+      <img src="./assets/icons/logo.svg" alt="LifeOS" width="60" height="60">
+      <span class="badge badge-accent">100% Local &amp; Offline-First</span>
+      <h1>Bem-vindo ao LifeOS</h1>
+      <p class="text-secondary">Organize toda a sua vida em um ambiente privado, rápido e armazenado exclusivamente no seu dispositivo.</p>
+
+      <form id="onboarding-form" class="form-stack">
+        <div class="form-group">
+          <label for="ob-name">Seu nome</label>
+          <input type="text" id="ob-name" class="input" placeholder="Como deseja ser chamado?" required maxlength="40">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ob-currency">Moeda principal</label>
+            <select id="ob-currency" class="input">
+              <option value="BRL" selected>Real (R$)</option>
+              <option value="USD">Dólar (US$)</option>
+              <option value="EUR">Euro (€)</option>
+              <option value="GBP">Libra (£)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ob-theme">Tema</label>
+            <select id="ob-theme" class="input">
+              <option value="dark" selected>Dark Premium (#0B0D10)</option>
+              <option value="oled">OLED Puro (#000000)</option>
+              <option value="light">Claro</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="checkbox-card" for="ob-demo">
+          <input type="checkbox" id="ob-demo">
+          <div>
+            <strong>Incluir dados demonstrativos opcionais</strong>
+            <small class="text-secondary">Adiciona exemplos de tarefas, hábitos, metas e notas (sem saldos financeiros fictícios). Removível nas configurações.</small>
+          </div>
+        </label>
+
+        <div class="info-callout">
+          <strong>Importante (iPhone):</strong> O primeiro carregamento e a instalação na Tela de Início precisam de internet para concluir o cache. Depois de instalado, o LifeOS opera totalmente offline.
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Começar a usar</button>
+      </form>
+    </div>
+  </section>
+
+  <div id="app-shell" class="app-shell">
+    <header class="app-header">
+      <div class="header-left" id="header-profile-trigger" role="button" tabindex="0">
+        <div id="header-avatar" class="avatar">L</div>
+        <div class="header-greeting-wrap">
+          <span id="header-date" class="header-date"></span>
+          <h1 id="header-greeting" class="header-greeting">Olá</h1>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <span id="network-pill" class="network-pill online">
+          <span class="status-dot"></span>
+          <span class="network-label">Local</span>
+        </span>
+        <button type="button" id="btn-global-search" class="icon-btn" aria-label="Pesquisar">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+        <button type="button" id="btn-notifications" class="icon-btn" aria-label="Notificações">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <span id="notif-badge" class="notif-badge hidden">0</span>
+        </button>
+        <button type="button" id="btn-settings" class="icon-btn" aria-label="Configurações">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 1
