@@ -1,0 +1,12 @@
+{
+  "name": "lifeos",
+  "version": "1.0.0",
+  "description": "LifeOS Personal Operating System",
+  "dependencies": {
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/ios": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}
