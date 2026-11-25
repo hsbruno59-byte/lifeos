@@ -1,0 +1,13 @@
+@media (min-width: 640px) {
+  .kpi-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .quick-grid { grid-template-columns: repeat(3, 1fr); }
+  .sheet-backdrop { align-items: center; }
+  .bottom-sheet { border-radius: var(--radius-xl); }
+  .bottom-nav { max-width: 820px; left: 50%; transform: translateX(-50%); border-left: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-top-left-radius: var(--radius-lg); border-top-right-radius: var(--radius-lg); }
+  .fab-btn { right: calc(50% - 390px); }
+}
+
+@media (max-width: 375px) {
+  .form-row { grid-template-columns: 1fr; }
+  .kpi-value { font-size: 18px; }
+}
