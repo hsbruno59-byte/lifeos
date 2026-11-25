@@ -1,0 +1,67 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-ipa:
+    runs-on: macos-14
+    steps:
+      - name: Baixar arquivos do projeto
+        uses: actions/checkout@v4
+
+      - name: Preparar pasta www
+        run: |
+          mkdir -p www
+          cp index.html manifest.json sw.js www/
+          cp -r css js assets www/
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Gerar projeto iOS com Capacitor
+        run: |
+          npm install
+          npx cap add ios
+          npx cap sync ios
+
+      - name: Compilar aplicativo iPhone
+        run: |
+          if [ -d "ios/App/App.xcworkspace" ]; then
+            xcodebuild -workspace ios/App/App.xcworkspace \
+              -scheme App \
+              -configuration Release \
+              -sdk iphoneos \
+              -archivePath build/App.xcarchive \
+              archive \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO \
+              CODE_SIGN_IDENTITY=""
+          else
+            xcodebuild -project ios/App/App.xcodeproj \
+              -scheme App \
+              -configuration Release \
+              -sdk iphoneos \
+              -archivePath build/App.xcarchive \
+              archive \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO \
+              CODE_SIGN_IDENTITY=""
+          fi
+
+      - name: Empacotar arquivo LifeOS.ipa
+        run: |
+          mkdir -p build/Payload
+          cp -r build/App.xcarchive/Products/Applications/App.app build/Payload/
+          cd build
+          zip -r LifeOS.ipa Payload
+
+      - name: Liberar download do IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: LifeOS-iOS-IPA
+          path: build/LifeOS.ipa
