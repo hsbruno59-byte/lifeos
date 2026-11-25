@@ -1,0 +1,10 @@
+{
+  "appId": "com.pessoal.lifeos",
+  "appName": "LifeOS",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#0B0D10"
+  }
+}
