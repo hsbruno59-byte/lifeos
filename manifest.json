@@ -1,0 +1,20 @@
+{
+  "name": "LifeOS — Sistema Operacional Pessoal",
+  "short_name": "LifeOS",
+  "description": "Sistema operacional pessoal offline-first.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B0D10",
+  "theme_color": "#0B0D10",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "./assets/icons/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
