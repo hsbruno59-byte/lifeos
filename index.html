@@ -3,93 +3,1162 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="LifeOS">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#0B0D10">
-  <title>LifeOS — Sistema Operacional Pessoal</title>
+  <meta name="theme-color" content="#0D1117">
+  <title>LifeOS — Sistema Pessoal</title>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg-base: #0D1117;
+      --bg-surface: #161B22;
+      --bg-elevated: #1F2630;
+      --border: #2B3440;
+      --text-primary: #F5F7FA;
+      --text-secondary: #929BA6;
+      --text-muted: #68727E;
+      --accent: #8BE0A3;
+      --accent-fg: #08180E;
+      --accent-soft: rgba(139, 224, 163, 0.14);
+      --danger: #F26D6D;
+      --danger-soft: rgba(242, 109, 109, 0.14);
+      --warning: #F2C96D;
+      --info: #6DB3F2;
+      --purple: #B58BF2;
+      --shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+    }
+    [data-theme="oled"] {
+      --bg-base: #000000;
+      --bg-surface: #0A0C10;
+      --bg-elevated: #141820;
+      --border: #222832;
+      --text-primary: #FFFFFF;
+      --text-secondary: #8E97A4;
+      --text-muted: #5C6572;
+    }
+    [data-theme="light"] {
+      --bg-base: #F3F5F8;
+      --bg-surface: #FFFFFF;
+      --bg-elevated: #E9EDF2;
+      --border: #D5DCE4;
+      --text-primary: #11161D;
+      --text-secondary: #535E6B;
+      --text-muted: #7C8794;
+      --accent: #189E52;
+      --accent-fg: #FFFFFF;
+      --accent-soft: rgba(24, 158, 82, 0.12);
+      --danger: #D93838;
+      --danger-soft: rgba(217, 56, 56, 0.12);
+      --warning: #C98A14;
+      --info: #2574C4;
+      --purple: #7B49C9;
+      --shadow: 0 8px 22px rgba(17, 22, 29, 0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      height: 100%;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.45;
+      overflow-x: hidden;
+    }
+    .hidden { display: none !important; }
+    .mono { font-variant-numeric: tabular-nums; }
+    .text-secondary { color: var(--text-secondary); }
+    .text-muted { color: var(--text-muted); }
+    .text-accent { color: var(--accent); }
+    .text-danger { color: var(--danger); }
 
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" type="image/svg+xml" href="./assets/icons/logo.svg">
-  <link rel="apple-touch-icon" href="./assets/icons/logo.svg">
+    .app-header {
+      position: sticky; top: 0; z-index: 30;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+      background: var(--bg-base);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--accent-soft); color: var(--accent);
+      border: 1px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 15px;
+    }
+    .header-title { font-weight: 700; font-size: 15px; }
+    .header-subtitle { font-size: 12px; color: var(--text-secondary); text-transform: capitalize; }
+    .header-actions { display: flex; align-items: center; gap: 6px; }
+    .icon-btn {
+      position: relative; width: 34px; height: 34px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg-surface);
+      color: var(--text-primary); font-size: 15px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .notif-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: var(--danger); color: #fff; font-size: 10px; font-weight: 700;
+      min-width: 16px; height: 16px; border-radius: 99px; padding: 0 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
 
-  <link rel="stylesheet" href="./css/style.css">
-  <link rel="stylesheet" href="./css/components.css">
-  <link rel="stylesheet" href="./css/responsive.css">
+    .sub-nav {
+      display: flex; gap: 6px; overflow-x: auto; padding: 8px 16px;
+      background: var(--bg-base); border-bottom: 1px solid var(--border);
+      scrollbar-width: none;
+    }
+    .sub-nav::-webkit-scrollbar { display: none; }
+    .sub-tab {
+      border: 1px solid var(--border); background: var(--bg-surface);
+      color: var(--text-secondary); padding: 6px 12px; border-radius: 99px;
+      font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer;
+    }
+    .sub-tab.active {
+      background: var(--accent); color: var(--accent-fg); border-color: var(--accent);
+    }
+
+    .main-content {
+      max-width: 680px; margin: 0 auto;
+      padding: 14px 16px calc(96px + env(safe-area-inset-bottom));
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .section-heading {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .section-heading h2 { font-size: 20px; font-weight: 700; }
+
+    .card {
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 14px; box-shadow: var(--shadow);
+    }
+    .card-subtle {
+      background: var(--bg-elevated); border: 1px solid var(--border);
+      border-radius: 12px; padding: 10px 12px;
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px; gap: 8px;
+    }
+    .card-title { font-size: 15px; font-weight: 700; }
+    .row-between { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .row-gap-sm { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .item-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .kpi-grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    @media (min-width: 480px) { .kpi-grid-4 { grid-template-columns: repeat(4, 1fr); } }
+    .kpi-box {
+      background: var(--bg-elevated); border: 1px solid var(--border);
+      border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 2px;
+    }
+    .kpi-label { font-size: 11.5px; color: var(--text-secondary); }
+    .kpi-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .kpi-sub { font-size: 11px; color: var(--text-muted); }
+
+    .progress-track {
+      width: 100%; height: 7px; border-radius: 99px;
+      background: var(--bg-elevated); overflow: hidden;
+    }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.25s; }
+    .progress-fill.danger { background: var(--danger); }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600;
+      background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border);
+    }
+    .badge-accent { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+    .badge-info { background: rgba(109, 179, 242, 0.16); color: var(--info); border-color: transparent; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 14px; border-radius: 12px; font-size: 14px; font-weight: 600;
+      border: 1px solid transparent; cursor: pointer;
+    }
+    .btn-sm { padding: 6px 11px; font-size: 12.5px; border-radius: 10px; }
+    .btn-block { width: 100%; }
+    .btn-primary { background: var(--accent); color: var(--accent-fg); }
+    .btn-secondary { background: var(--bg-elevated); color: var(--text-primary); border-color: var(--border); }
+    .btn-danger-soft { background: var(--danger-soft); color: var(--danger); border-color: rgba(242,109,109,0.3); }
+    .icon-btn-sm {
+      width: 28px; height: 28px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg-elevated);
+      color: var(--text-secondary); font-size: 13px; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+
+    .form-stack { display: flex; flex-direction: column; gap: 11px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .input {
+      width: 100%; padding: 10px 12px; border-radius: 11px;
+      border: 1px solid var(--border); background: var(--bg-elevated);
+      color: var(--text-primary); font-size: 14px; font-family: inherit;
+    }
+    textarea.input { min-height: 76px; resize: vertical; }
+    .checkbox-card {
+      display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+      border-radius: 11px; background: var(--bg-elevated); border: 1px solid var(--border);
+      font-size: 13px; cursor: pointer;
+    }
+
+    .chip-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+    .chip-row::-webkit-scrollbar { display: none; }
+    .chip {
+      padding: 5px 11px; border-radius: 99px; font-size: 12.5px; font-weight: 600;
+      border: 1px solid var(--border); background: var(--bg-surface);
+      color: var(--text-secondary); white-space: nowrap; cursor: pointer;
+    }
+    .chip.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+
+    .list-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 12px;
+    }
+    .list-item.completed { opacity: 0.65; }
+    .check-circle {
+      width: 24px; height: 24px; min-width: 24px; border-radius: 50%;
+      border: 2px solid var(--border); background: transparent;
+      color: var(--accent-fg); font-weight: 700; font-size: 13px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; margin-top: 2px;
+    }
+    .check-circle.checked { background: var(--accent); border-color: var(--accent); }
+
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+    .cal-weekday { font-size: 11px; font-weight: 600; color: var(--text-muted); padding: 4px 0; }
+    .cal-day {
+      aspect-ratio: 1; border-radius: 10px; border: 1px solid transparent;
+      background: var(--bg-elevated); color: var(--text-primary); font-size: 13px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px; cursor: pointer;
+    }
+    .cal-day.other-month { background: transparent; pointer-events: none; }
+    .cal-day.today { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+    .cal-day.selected { background: var(--accent); color: var(--accent-fg); font-weight: 700; }
+    .cal-dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+
+    .heatmap-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+    .heat-cell {
+      aspect-ratio: 1; border-radius: 6px; border: 1px solid var(--border);
+      background: var(--bg-elevated); color: var(--text-muted); font-size: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .heat-cell.partial { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+    .heat-cell.done { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 700; }
+
+    .timeline { display: flex; flex-direction: column; gap: 8px; }
+    .timeline-item { display: flex; gap: 10px; align-items: stretch; }
+    .timeline-time { width: 46px; font-size: 12px; font-weight: 700; color: var(--accent); text-align: right; padding-top: 8px; }
+    .timeline-card { flex: 1; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; padding: 9px 11px; }
+
+    .chart-canvas { width: 100%; height: 155px; display: block; }
+    .empty-state { text-align: center; padding: 20px 12px; }
+
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      background: var(--bg-surface); border-top: 1px solid var(--border);
+      padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+    }
+    .nav-item {
+      background: none; border: none; color: var(--text-secondary);
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      font-size: 11px; font-weight: 600; cursor: pointer; padding: 4px 0;
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-icon { font-size: 18px; line-height: 1.1; }
+
+    .fab {
+      position: fixed; right: 16px; bottom: calc(70px + env(safe-area-inset-bottom)); z-index: 28;
+      width: 50px; height: 50px; border-radius: 50%; border: none;
+      background: var(--accent); color: var(--accent-fg);
+      font-size: 26px; font-weight: 600; box-shadow: var(--shadow); cursor: pointer;
+    }
+
+    .onboarding-overlay, .modal-backdrop {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(0, 0, 0, 0.72);
+      display: flex; align-items: flex-end; justify-content: center;
+      padding: 16px;
+    }
+    .onboarding-overlay { align-items: center; background: var(--bg-base); }
+    .onboarding-card, .modal-sheet {
+      width: 100%; max-width: 520px; max-height: 88vh; overflow-y: auto;
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 18px; box-shadow: var(--shadow);
+    }
+    .onboarding-logo { font-size: 14px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+    .onboarding-card h1 { font-size: 22px; margin-bottom: 6px; }
+    .onboarding-card p { margin-bottom: 14px; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .quick-btn {
+      padding: 12px; border-radius: 12px; border: 1px solid var(--border);
+      background: var(--bg-elevated); color: var(--text-primary);
+      font-size: 13.5px; font-weight: 600; text-align: left; cursor: pointer;
+    }
+
+    .toast-container {
+      position: fixed; top: calc(64px + env(safe-area-inset-top)); left: 50%;
+      transform: translateX(-50%); z-index: 70; display: flex; flex-direction: column; gap: 6px;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--bg-elevated); color: var(--text-primary);
+      border: 1px solid var(--accent); padding: 8px 14px; border-radius: 99px;
+      font-size: 13px; font-weight: 600; box-shadow: var(--shadow);
+    }
+    .toast.error { border-color: var(--danger); color: var(--danger); }
+  </style>
 </head>
 <body>
-  <section id="onboarding-screen" class="onboarding-overlay hidden" aria-label="Configuração Inicial">
+  <div id="onboarding-screen" class="onboarding-overlay hidden">
     <div class="onboarding-card">
-      <img src="./assets/icons/logo.svg" alt="LifeOS" width="60" height="60">
-      <span class="badge badge-accent">100% Local &amp; Offline-First</span>
+      <div class="onboarding-logo">✦ LifeOS</div>
       <h1>Bem-vindo ao LifeOS</h1>
-      <p class="text-secondary">Organize toda a sua vida em um ambiente privado, rápido e armazenado exclusivamente no seu dispositivo.</p>
-
+      <p class="text-secondary">Seu sistema pessoal offline para tarefas, hábitos, finanças, metas e projetos.</p>
       <form id="onboarding-form" class="form-stack">
         <div class="form-group">
-          <label for="ob-name">Seu nome</label>
-          <input type="text" id="ob-name" class="input" placeholder="Como deseja ser chamado?" required maxlength="40">
+          <label for="ob-name">Como deseja ser chamado? *</label>
+          <input type="text" id="ob-name" class="input" placeholder="Seu nome" required>
         </div>
-
         <div class="form-row">
           <div class="form-group">
-            <label for="ob-currency">Moeda principal</label>
+            <label for="ob-currency">Moeda</label>
             <select id="ob-currency" class="input">
               <option value="BRL" selected>Real (R$)</option>
               <option value="USD">Dólar (US$)</option>
               <option value="EUR">Euro (€)</option>
-              <option value="GBP">Libra (£)</option>
             </select>
           </div>
           <div class="form-group">
             <label for="ob-theme">Tema</label>
             <select id="ob-theme" class="input">
-              <option value="dark" selected>Dark Premium (#0B0D10)</option>
-              <option value="oled">OLED Puro (#000000)</option>
+              <option value="dark" selected>Dark Premium</option>
+              <option value="oled">OLED Puro</option>
               <option value="light">Claro</option>
             </select>
           </div>
         </div>
-
-        <label class="checkbox-card" for="ob-demo">
-          <input type="checkbox" id="ob-demo">
-          <div>
-            <strong>Incluir dados demonstrativos opcionais</strong>
-            <small class="text-secondary">Adiciona exemplos de tarefas, hábitos, metas e notas (sem saldos financeiros fictícios). Removível nas configurações.</small>
-          </div>
+        <label class="checkbox-card">
+          <input type="checkbox" id="ob-demo" checked>
+          <span>Adicionar exemplos para explorar</span>
         </label>
-
-        <div class="info-callout">
-          <strong>Importante (iPhone):</strong> O primeiro carregamento e a instalação na Tela de Início precisam de internet para concluir o cache. Depois de instalado, o LifeOS opera totalmente offline.
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block btn-lg">Começar a usar</button>
+        <button type="submit" class="btn btn-primary btn-block">Começar a usar</button>
       </form>
     </div>
-  </section>
+  </div>
 
-  <div id="app-shell" class="app-shell">
-    <header class="app-header">
-      <div class="header-left" id="header-profile-trigger" role="button" tabindex="0">
-        <div id="header-avatar" class="avatar">L</div>
-        <div class="header-greeting-wrap">
-          <span id="header-date" class="header-date"></span>
-          <h1 id="header-greeting" class="header-greeting">Olá</h1>
-        </div>
+  <header class="app-header">
+    <div class="header-left" id="header-profile-trigger" style="cursor:pointer;">
+      <div id="header-avatar" class="avatar">L</div>
+      <div>
+        <div id="header-greeting" class="header-title">Olá, Usuário</div>
+        <div id="header-date" class="header-subtitle">Hoje</div>
       </div>
+    </div>
+    <div class="header-actions">
+      <button type="button" id="btn-global-search" class="icon-btn" aria-label="Buscar">🔍</button>
+      <button type="button" id="btn-notifications" class="icon-btn" aria-label="Alertas">
+        🔔<span id="notif-badge" class="notif-badge hidden">0</span>
+      </button>
+      <button type="button" id="btn-settings" class="icon-btn" aria-label="Configurações">⚙️</button>
+    </div>
+  </header>
 
-      <div class="header-actions">
-        <span id="network-pill" class="network-pill online">
-          <span class="status-dot"></span>
-          <span class="network-label">Local</span>
-        </span>
-        <button type="button" id="btn-global-search" class="icon-btn" aria-label="Pesquisar">
-          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        </button>
-        <button type="button" id="btn-notifications" class="icon-btn" aria-label="Notificações">
-          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          <span id="notif-badge" class="notif-badge hidden">0</span>
-        </button>
-        <button type="button" id="btn-settings" class="icon-btn" aria-label="Configurações">
-          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 1
+  <nav id="sub-nav" class="sub-nav hidden"></nav>
+  <main id="main-content" class="main-content"></main>
+
+  <button type="button" id="fab-quick-capture" class="fab" aria-label="Novo">+</button>
+
+  <nav id="bottom-nav" class="bottom-nav">
+    <button type="button" class="nav-item active" data-section="dashboard"><span class="nav-icon">⌂</span><span>Início</span></button>
+    <button type="button" class="nav-item" data-section="planning"><span class="nav-icon">☑</span><span>Rotina</span></button>
+    <button type="button" class="nav-item" data-section="finance"><span class="nav-icon">◈</span><span>Finanças</span></button>
+    <button type="button" class="nav-item" data-section="goals"><span class="nav-icon">◎</span><span>Metas</span></button>
+    <button type="button" class="nav-item" data-section="library"><span class="nav-icon">▤</span><span>Base</span></button>
+  </nav>
+
+  <div id="quick-capture-backdrop" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>Captura Rápida</h3>
+        <button type="button" id="close-quick-capture" class="icon-btn-sm">✕</button>
+      </div>
+      <div class="quick-grid">
+        <button type="button" class="quick-btn" data-quick="task">☑ Nova Tarefa</button>
+        <button type="button" class="quick-btn" data-quick="event">📅 Compromisso</button>
+        <button type="button" class="quick-btn" data-quick="expense">− Despesa</button>
+        <button type="button" class="quick-btn" data-quick="income">+ Receita</button>
+        <button type="button" class="quick-btn" data-quick="note">✎ Nova Nota</button>
+        <button type="button" class="quick-btn" data-quick="goal">◎ Novo Objetivo</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="search-overlay" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>Busca Global</h3>
+        <button type="button" id="close-global-search" class="icon-btn-sm">✕</button>
+      </div>
+      <input type="search" id="global-search-input" class="input" placeholder="Pesquisar no sistema...">
+      <div id="global-search-results" class="item-list" style="margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <div id="notifications-overlay" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3>Alertas</h3>
+        <button type="button" id="close-notifications" class="icon-btn-sm">✕</button>
+      </div>
+      <div id="notifications-list"></div>
+    </div>
+  </div>
+
+  <div id="modal-backdrop" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 id="modal-title">Título</h3>
+        <button type="button" id="close-modal" class="icon-btn-sm">✕</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <div id="confirm-backdrop" class="modal-backdrop hidden">
+    <div class="modal-sheet">
+      <div class="modal-header"><h3 id="confirm-title">Confirmar</h3></div>
+      <p id="confirm-message" class="text-secondary" style="margin-bottom:14px;"></p>
+      <div class="form-row">
+        <button type="button" id="confirm-cancel" class="btn btn-secondary">Cancelar</button>
+        <button type="button" id="confirm-ok" class="btn btn-primary">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script>
+    (function () {
+      const DB_NAME = 'LifeOS_Solo_DB';
+      const STORES = ['tasks', 'events', 'habits', 'habitLogs', 'accounts', 'cards', 'transactions', 'budgets', 'goals', 'notes', 'projects'];
+      const PREFS_KEY = 'lifeos_solo_prefs_v1';
+      let db = null;
+
+      const Prefs = {
+        getAll() {
+          try {
+            return { userName: '', currency: 'BRL', theme: 'dark', weekStart: 0, onboarded: false, ...JSON.parse(localStorage.getItem(PREFS_KEY) || '{}') };
+          } catch { return { userName: '', currency: 'BRL', theme: 'dark', weekStart: 0, onboarded: false }; }
+        },
+        get(k) { return this.getAll()[k]; },
+        set(k, v) { const n = { ...this.getAll(), [k]: v }; localStorage.setItem(PREFS_KEY, JSON.stringify(n)); return n; },
+        reset() { localStorage.removeItem(PREFS_KEY); }
+      };
+
+      const DB = {
+        init() {
+          if (db) return Promise.resolve(db);
+          return new Promise((res, rej) => {
+            const req = indexedDB.open(DB_NAME, 1);
+            req.onupgradeneeded = (e) => {
+              const d = e.target.result;
+              STORES.forEach((s) => { if (!d.objectStoreNames.contains(s)) d.createObjectStore(s, { keyPath: 'id' }); });
+            };
+            req.onsuccess = () => { db = req.result; res(db); };
+            req.onerror = () => rej(req.error);
+          });
+        },
+        async getAll(store) {
+          const d = await this.init();
+          return new Promise((res, rej) => {
+            const r = d.transaction(store, 'readonly').objectStore(store).getAll();
+            r.onsuccess = () => res(r.result || []);
+            r.onerror = () => rej(r.error);
+          });
+        },
+        async get(store, id) {
+          const d = await this.init();
+          return new Promise((res, rej) => {
+            const r = d.transaction(store, 'readonly').objectStore(store).get(id);
+            r.onsuccess = () => res(r.result || null);
+            r.onerror = () => rej(r.error);
+          });
+        },
+        async put(store, item) {
+          const d = await this.init();
+          return new Promise((res, rej) => {
+            const r = d.transaction(store, 'readwrite').objectStore(store).put(item);
+            r.onsuccess = () => res(item);
+            r.onerror = () => rej(r.error);
+          });
+        },
+        async delete(store, id) {
+          const d = await this.init();
+          return new Promise((res, rej) => {
+            const r = d.transaction(store, 'readwrite').objectStore(store).delete(id);
+            r.onsuccess = () => res(true);
+            r.onerror = () => rej(r.error);
+          });
+        },
+        async clearAll() {
+          const d = await this.init();
+          for (const s of STORES) {
+            await new Promise((res) => { const r = d.transaction(s, 'readwrite').objectStore(s).clear(); r.onsuccess = res; });
+          }
+        },
+        async seedDemo() {
+          const today = Utils.todayISO();
+          await this.put('tasks', { id: 't_demo1', title: 'Organizar prioridades da semana', description: 'Definir foco principal.', priority: 'Alta', dueDate: today, dueTime: '09:00', category: 'Produtividade', subtasks: [{ id: 's1', title: 'Listar tarefas', done: true }], recurrence: 'none', completed: false });
+          await this.put('habits', { id: 'h_demo1', name: 'Beber 2L de água', frequency: 'daily', daysOfWeek: [0,1,2,3,4,5,6], dailyTarget: 4, unit: 'garrafas' });
+          await this.put('events', { id: 'e_demo1', title: 'Revisão diária', startDate: today, startTime: '18:00', endTime: '18:30', category: 'Pessoal', location: 'Casa', description: '' });
+          await this.put('goals', { id: 'g_demo1', name: 'Ler 12 livros no ano', category: 'Acadêmicas', createdAt: today, deadline: Utils.addDays(today, 180), targetValue: 12, currentValue: 3, unit: 'livros', steps: [], history: [{ date: today, value: 3, note: 'Início' }] });
+          await this.put('notes', { id: 'n_demo1', title: 'Anotações Rápidas', category: 'Pessoal', pinned: true, content: 'Bem-vindo ao LifeOS!', updatedAt: new Date().toISOString() });
+          await this.put('projects', { id: 'p_demo1', name: 'Planejamento 2026', status: 'Em andamento', deadline: Utils.addDays(today, 30), description: 'Organização geral.', tasks: [{ id: 'pt1', title: 'Configurar metas', done: true }] });
+        }
+      };
+
+      const Utils = {
+        todayISO() {
+          const d = new Date();
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        },
+        addDays(iso, days) {
+          const [y, m, d] = (iso || this.todayISO()).split('-').map(Number);
+          const dt = new Date(y, m - 1, d + Number(days || 0));
+          return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+        },
+        uid(p = 'id') { return `${p}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`; },
+        esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); },
+        money(v) {
+          const cur = Prefs.get('currency') || 'BRL';
+          const loc = cur === 'BRL' ? 'pt-BR' : cur === 'EUR' ? 'de-DE' : 'en-US';
+          return new Intl.NumberFormat(loc, { style: 'currency', currency: cur }).format(Number(v) || 0);
+        },
+        dateBR(iso) {
+          if (!iso) return '—';
+          const p = String(iso).slice(0, 10).split('-');
+          return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : iso;
+        },
+        donut(canvas, items) {
+          if (!canvas) return;
+          const dpr = window.devicePixelRatio || 1;
+          const w = Math.max(260, canvas.getBoundingClientRect().width || 300);
+          const h = 150;
+          canvas.width = w * dpr; canvas.height = h * dpr;
+          const ctx = canvas.getContext('2d');
+          ctx.scale(dpr, dpr); ctx.clearRect(0, 0, w, h);
+          const total = items.reduce((s, i) => s + i.value, 0);
+          if (!total) {
+            ctx.fillStyle = '#929BA6'; ctx.font = '13px -apple-system, sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('Sem despesas no período', w / 2, h / 2); return;
+          }
+          const cols = ['#8BE0A3', '#6DB3F2', '#F2C96D', '#B58BF2', '#F26D6D'];
+          const cx = 74, cy = h / 2, r = 56;
+          let ang = -Math.PI / 2;
+          items.slice(0, 5).forEach((it, i) => {
+            const sl = (it.value / total) * Math.PI * 2;
+            ctx.beginPath(); ctx.arc(cx, cy, r, ang, ang + sl); ctx.arc(cx, cy, r * 0.56, ang + sl, ang, true);
+            ctx.closePath(); ctx.fillStyle = cols[i % cols.length]; ctx.fill(); ang += sl;
+          });
+          items.slice(0, 5).forEach((it, i) => {
+            const y = 26 + i * 24;
+            ctx.fillStyle = cols[i % cols.length]; ctx.fillRect(150, y - 9, 10, 10);
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#F5F7FA';
+            ctx.font = '12px -apple-system, sans-serif'; ctx.textAlign = 'left';
+            ctx.fillText(`${it.label.slice(0, 14)} (${Math.round((it.value / total) * 100)}%)`, 166, y);
+          });
+        }
+      };
+
+      let sec = 'dashboard', sub = null;
+      const SUBS = {
+        planning: [{ id: 'tasks', label: 'Tarefas' }, { id: 'calendar', label: 'Calendário' }, { id: 'habits', label: 'Hábitos' }],
+        finance: [{ id: 'overview', label: 'Visão Geral' }, { id: 'transactions', label: 'Lançamentos' }, { id: 'accounts', label: 'Contas' }, { id: 'budget', label: 'Orçamento' }],
+        library: [{ id: 'notes', label: 'Notas' }, { id: 'projects', label: 'Projetos' }, { id: 'reports', label: 'Relatórios' }]
+      };
+
+      const UI = {
+        go(s, sb = null) {
+          sec = s;
+          const tabs = SUBS[s] || null;
+          sub = tabs ? (sb && tabs.some((t) => t.id === sb) ? sb : tabs[0].id) : null;
+          document.querySelectorAll('#bottom-nav .nav-item').forEach((b) => b.classList.toggle('active', b.dataset.section === s));
+          const sn = document.getElementById('sub-nav');
+          if (tabs) {
+            sn.classList.remove('hidden');
+            sn.innerHTML = tabs.map((t) => `<button type="button" class="sub-tab ${t.id === sub ? 'active' : ''}" data-sub="${t.id}">${t.label}</button>`).join('');
+            sn.querySelectorAll('.sub-tab').forEach((b) => b.addEventListener('click', () => {
+              sub = b.dataset.sub;
+              sn.querySelectorAll('.sub-tab').forEach((x) => x.classList.toggle('active', x.dataset.sub === sub));
+              this.render();
+            }));
+          } else { sn.classList.add('hidden'); }
+          this.render();
+        },
+        async render() {
+          const main = document.getElementById('main-content');
+          if (sec === 'dashboard') await Views.dashboard(main);
+          else if (sec === 'planning') {
+            if (sub === 'calendar') await Views.calendar(main);
+            else if (sub === 'habits') await Views.habits(main);
+            else await Views.tasks(main);
+          } else if (sec === 'finance') await Views.finance(main, sub);
+          else if (sec === 'goals') await Views.goals(main);
+          else if (sec === 'library') {
+            if (sub === 'projects') await Views.projects(main);
+            else if (sub === 'reports') await Views.reports(main);
+            else await Views.notes(main);
+          } else if (sec === 'settings') await Views.settings(main);
+        },
+        modal(title, html) {
+          document.getElementById('modal-title').textContent = title;
+          const b = document.getElementById('modal-body');
+          b.innerHTML = html;
+          document.getElementById('modal-backdrop').classList.remove('hidden');
+          return b;
+        },
+        closeModal() { document.getElementById('modal-backdrop').classList.add('hidden'); },
+        confirm(title, msg) {
+          return new Promise((res) => {
+            const bd = document.getElementById('confirm-backdrop');
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-message').textContent = msg;
+            bd.classList.remove('hidden');
+            const ok = document.getElementById('confirm-ok'), ca = document.getElementById('confirm-cancel');
+            const end = (v) => { bd.classList.add('hidden'); ok.onclick = null; ca.onclick = null; res(v); };
+            ok.onclick = () => end(true); ca.onclick = () => end(false);
+          });
+        },
+        toast(msg, err = false) {
+          const c = document.getElementById('toast-container');
+          const el = document.createElement('div');
+          el.className = `toast ${err ? 'error' : ''}`;
+          el.textContent = msg;
+          c.appendChild(el);
+          setTimeout(() => el.remove(), 2500);
+        }
+      };
+
+      let tView = 'today', cDate = Utils.todayISO(), fType = 'all', fMonth = Utils.todayISO().slice(0, 7);
+
+      const Views = {
+        async dashboard(el) {
+          const today = Utils.todayISO(), month = today.slice(0, 7);
+          const [tasks, events, habits, logs, accs, txs] = await Promise.all([
+            DB.getAll('tasks'), DB.getAll('events'), DB.getAll('habits'), DB.getAll('habitLogs'),
+            DB.getAll('accounts'), DB.getAll('transactions')
+          ]);
+          const tToday = tasks.filter((t) => t.dueDate === today);
+          const doneHab = habits.filter((h) => {
+            const l = logs.find((x) => x.habitId === h.id && x.date === today);
+            return l && (l.completed || Number(l.count || 0) >= Math.max(1, Number(h.dailyTarget || 1)));
+          });
+          const totDay = tToday.length + habits.length;
+          const pctDay = totDay ? Math.round(((tToday.filter((t) => t.completed).length + doneHab.length) / totDay) * 100) : 0;
+
+          const bal = accs.reduce((s, a) => s + Number(a.initialBalance || 0), 0)
+            + txs.filter((t) => t.type === 'income').reduce((s, t) => s + Number(t.amount || 0), 0)
+            - txs.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount || 0), 0);
+          const mInc = txs.filter((t) => t.type === 'income' && (t.date || '').startsWith(month)).reduce((s, t) => s + Number(t.amount || 0), 0);
+          const mExpList = txs.filter((t) => t.type === 'expense' && (t.date || '').startsWith(month));
+          const mExp = mExpList.reduce((s, t) => s + Number(t.amount || 0), 0);
+
+          const cats = {};
+          mExpList.forEach((t) => { cats[t.category || 'Outros'] = (cats[t.category || 'Outros'] || 0) + Number(t.amount || 0); });
+          const donutData = Object.entries(cats).map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value);
+          const upEvents = events.filter((e) => e.startDate >= today).sort((a, b) => `${a.startDate}${a.startTime}`.localeCompare(`${b.startDate}${b.startTime}`));
+
+          el.innerHTML = `
+            <section class="card">
+              <div class="card-header"><h2 class="card-title">Resumo do Dia</h2><span class="badge badge-accent mono">${pctDay}%</span></div>
+              <div class="progress-track" style="margin-bottom:12px;"><div class="progress-fill" style="width:${pctDay}%;"></div></div>
+              <div class="kpi-grid-4">
+                <div class="kpi-box" data-go="planning:tasks"><span class="kpi-label">Pendentes</span><span class="kpi-value">${tasks.filter((t) => !t.completed).length}</span></div>
+                <div class="kpi-box" data-go="planning:tasks"><span class="kpi-label">Concluídas</span><span class="kpi-value text-accent">${tasks.filter((t) => t.completed).length}</span></div>
+                <div class="kpi-box" data-go="planning:habits"><span class="kpi-label">Hábitos</span><span class="kpi-value">${doneHab.length}/${habits.length}</span></div>
+                <div class="kpi-box" data-go="planning:calendar"><span class="kpi-label">Agenda</span><span class="kpi-value">${upEvents.length}</span></div>
+              </div>
+            </section>
+            <section class="card">
+              <div class="card-header"><h2 class="card-title">Finanças</h2><button type="button" class="btn btn-secondary btn-sm" data-go="finance:overview">Abrir</button></div>
+              <div class="kpi-grid" style="margin-bottom:10px;">
+                <div class="kpi-box"><span class="kpi-label">Saldo Atual</span><span class="kpi-value ${bal < 0 ? 'text-danger' : 'text-accent'}">${Utils.money(bal)}</span></div>
+                <div class="kpi-box"><span class="kpi-label">Balanço Mês</span><span class="kpi-value">${Utils.money(mInc - mExp)}</span></div>
+              </div>
+              <canvas id="d-donut" class="chart-canvas"></canvas>
+            </section>
+            <section class="card">
+              <div class="card-header"><h2 class="card-title">Próximos Compromissos</h2></div>
+              ${upEvents.length === 0 ? `<p class="text-secondary">Nenhum compromisso agendado.</p>` : `<div class="timeline">${upEvents.slice(0, 3).map((ev) => `
+                <div class="timeline-item">
+                  <div class="timeline-time">${Utils.esc(ev.startTime)}<br><span class="text-muted" style="font-size:10px;">${Utils.dateBR(ev.startDate).slice(0, 5)}</span></div>
+                  <div class="timeline-card"><strong>${Utils.esc(ev.title)}</strong><div class="kpi-sub">${Utils.esc(ev.location || ev.category || '')}</div></div>
+                </div>`).join('')}</div>`}
+            </section>
+          `;
+          el.querySelectorAll('[data-go]').forEach((x) => x.addEventListener('click', () => { const [a, b] = x.dataset.go.split(':'); UI.go(a, b); }));
+          Utils.donut(document.getElementById('d-donut'), donutData);
+        },
+
+        async tasks(el) {
+          const tasks = await DB.getAll('tasks'), today = Utils.todayISO();
+          const list = tasks.filter((t) => {
+            if (tView === 'today') return !t.completed && t.dueDate === today;
+            if (tView === 'overdue') return !t.completed && t.dueDate && t.dueDate < today;
+            if (tView === 'completed') return Boolean(t.completed);
+            return !t.completed;
+          });
+          el.innerHTML = `
+            <div class="section-heading"><h2>Tarefas</h2><button type="button" id="new-t" class="btn btn-primary btn-sm">+ Tarefa</button></div>
+            <div class="chip-row">
+              ${[['today','Hoje'],['all','Pendentes'],['overdue','Atrasadas'],['completed','Concluídas']].map(([id,lbl]) =>
+                `<button type="button" class="chip ${tView === id ? 'active' : ''}" data-tv="${id}">${lbl}</button>`).join('')}
+            </div>
+            <div class="item-list">
+              ${list.length === 0 ? `<div class="empty-state"><p class="text-secondary">Nenhuma tarefa.</p></div>` : list.map((t) => `
+                <div class="list-item ${t.completed ? 'completed' : ''}">
+                  <button type="button" class="check-circle ${t.completed ? 'checked' : ''}" data-tt="${t.id}">${t.completed ? '✓' : ''}</button>
+                  <div style="flex:1;">
+                    <div class="row-between"><strong>${Utils.esc(t.title)}</strong><span class="badge">${Utils.esc(t.priority || 'Média')}</span></div>
+                    <div class="row-gap-sm" style="margin-top:4px;">${t.dueDate ? `<span class="badge">${Utils.dateBR(t.dueDate)}</span>` : ''}<span class="badge">${Utils.esc(t.category || 'Geral')}</span></div>
+                  </div>
+                  <button type="button" class="icon-btn-sm" data-dt="${t.id}">🗑</button>
+                </div>`).join('')}
+            </div>
+          `;
+          document.getElementById('new-t').onclick = () => Forms.task();
+          el.querySelectorAll('[data-tv]').forEach((b) => b.onclick = () => { tView = b.dataset.tv; this.tasks(el); });
+          el.querySelectorAll('[data-tt]').forEach((b) => b.onclick = async () => {
+            const t = await DB.get('tasks', b.dataset.tt);
+            if (t) { t.completed = !t.completed; await DB.put('tasks', t); UI.render(); }
+          });
+          el.querySelectorAll('[data-dt]').forEach((b) => b.onclick = async () => {
+            if (await UI.confirm('Excluir', 'Remover tarefa?')) { await DB.delete('tasks', b.dataset.dt); UI.render(); }
+          });
+        },
+
+        async calendar(el) {
+          const events = await DB.getAll('events'), today = Utils.todayISO();
+          const [y, m] = cDate.split('-').map(Number);
+          const first = new Date(y, m - 1, 1).getDay(), days = new Date(y, m, 0).getDate();
+          const cells = Array(first).fill('<div class="cal-day other-month"></div>');
+          for (let d = 1; d <= days; d++) {
+            const iso = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const has = events.some((e) => e.startDate === iso);
+            cells.push(`<button type="button" class="cal-day ${iso === today ? 'today' : ''} ${iso === cDate ? 'selected' : ''}" data-cd="${iso}"><span>${d}</span>${has ? '<span class="cal-dot"></span>' : ''}</button>`);
+          }
+          const dayEv = events.filter((e) => e.startDate === cDate).sort((a,b) => (a.startTime||'').localeCompare(b.startTime||''));
+          el.innerHTML = `
+            <div class="section-heading"><h2>Calendário</h2><button type="button" id="new-e" class="btn btn-primary btn-sm">+ Evento</button></div>
+            <div class="card">
+              <div class="row-between" style="margin-bottom:8px;">
+                <button type="button" class="icon-btn-sm" id="c-prev">‹</button>
+                <strong>${String(m).padStart(2,'0')}/${y}</strong>
+                <button type="button" class="icon-btn-sm" id="c-next">›</button>
+              </div>
+              <div class="cal-grid">${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map((w) => `<div class="cal-weekday">${w}</div>`).join('')}${cells.join('')}</div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">${Utils.dateBR(cDate)}</h3></div>
+              ${dayEv.length === 0 ? `<p class="text-secondary">Sem compromissos neste dia.</p>` : `<div class="timeline">${dayEv.map((ev) => `
+                <div class="timeline-item">
+                  <div class="timeline-time">${Utils.esc(ev.startTime)}</div>
+                  <div class="timeline-card row-between"><div><strong>${Utils.esc(ev.title)}</strong><div class="kpi-sub">${Utils.esc(ev.location || '')}</div></div><button type="button" class="icon-btn-sm" data-de="${ev.id}">🗑</button></div>
+                </div>`).join('')}</div>`}
+            </div>
+          `;
+          document.getElementById('new-e').onclick = () => Forms.event(cDate);
+          el.querySelectorAll('[data-cd]').forEach((b) => b.onclick = () => { cDate = b.dataset.cd; this.calendar(el); });
+          document.getElementById('c-prev').onclick = () => { const d = new Date(y, m - 2, 1); cDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`; this.calendar(el); };
+          document.getElementById('c-next').onclick = () => { const d = new Date(y, m, 1); cDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`; this.calendar(el); };
+          el.querySelectorAll('[data-de]').forEach((b) => b.onclick = async () => { if (await UI.confirm('Excluir', 'Remover evento?')) { await DB.delete('events', b.dataset.de); UI.render(); } });
+        },
+
+        async habits(el) {
+          const [habits, logs] = await Promise.all([DB.getAll('habits'), DB.getAll('habitLogs')]);
+          const today = Utils.todayISO();
+          el.innerHTML = `
+            <div class="section-heading"><h2>Hábitos</h2><button type="button" id="new-h" class="btn btn-primary btn-sm">+ Hábito</button></div>
+            ${habits.length === 0 ? `<div class="card"><p class="text-secondary">Nenhum hábito cadastrado.</p></div>` : `<div class="item-list">${habits.map((h) => {
+              const target = Math.max(1, Number(h.dailyTarget || 1));
+              const tLog = logs.find((l) => l.habitId === h.id && l.date === today);
+              const count = tLog ? Number(tLog.count || 0) : 0;
+              const done = count >= target;
+              const cells = [];
+              for (let i = 19; i >= 0; i--) {
+                const d = Utils.addDays(today, -i);
+                const l = logs.find((x) => x.habitId === h.id && x.date === d);
+                const c = l ? Number(l.count || 0) : 0;
+                cells.push(`<div class="heat-cell ${c >= target ? 'done' : c > 0 ? 'partial' : ''}">${d.slice(8,10)}</div>`);
+              }
+              return `<div class="card">
+                <div class="row-between" style="margin-bottom:8px;">
+                  <div><strong>${Utils.esc(h.name)}</strong><div class="kpi-sub">Meta: ${target} ${Utils.esc(h.unit || 'vez')}</div></div>
+                  <div class="row-gap-sm">
+                    <button type="button" class="btn btn-sm ${done ? 'btn-primary' : 'btn-secondary'}" data-hi="${h.id}">${done ? `✓ ${count}/${target}` : `+1 (${count}/${target})`}</button>
+                    <button type="button" class="icon-btn-sm" data-dh="${h.id}">🗑</button>
+                  </div>
+                </div>
+                <div class="heatmap-grid">${cells.join('')}</div>
+              </div>`;
+            }).join('')}</div>`}
+          `;
+          document.getElementById('new-h').onclick = () => Forms.habit();
+          el.querySelectorAll('[data-hi]').forEach((b) => b.onclick = async () => {
+            const h = await DB.get('habits', b.dataset.hi);
+            const target = Math.max(1, Number(h.dailyTarget || 1));
+            const id = `${h.id}_${today}`;
+            const old = await DB.get('habitLogs', id);
+            const next = (old ? Number(old.count || 0) : 0) >= target ? 0 : (old ? Number(old.count || 0) : 0) + 1;
+            await DB.put('habitLogs', { id, habitId: h.id, date: today, count: next, completed: next >= target });
+            UI.render();
+          });
+          el.querySelectorAll('[data-dh]').forEach((b) => b.onclick = async () => { if (await UI.confirm('Excluir', 'Remover hábito?')) { await DB.delete('habits', b.dataset.dh); UI.render(); } });
+        },
+
+        async finance(el, tab) {
+          const [accs, txs, budgets] = await Promise.all([DB.getAll('accounts'), DB.getAll('transactions'), DB.getAll('budgets')]);
+          const month = Utils.todayISO().slice(0, 7);
+          const mTxs = txs.filter((t) => (t.date || '').startsWith(month));
+          const mInc = mTxs.filter((t) => t.type === 'income').reduce((s, t) => s + Number(t.amount || 0), 0);
+          const mExp = mTxs.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount || 0), 0);
+          const bal = accs.reduce((s, a) => s + Number(a.initialBalance || 0), 0)
+            + txs.filter((t) => t.type === 'income').reduce((s, t) => s + Number(t.amount || 0), 0)
+            - txs.filter((t) => t.type === 'expense').reduce((s, t) => s + Number(t.amount || 0), 0);
+
+          if (tab === 'overview') {
+            const cats = {};
+            mTxs.filter((t) => t.type === 'expense').forEach((t) => { cats[t.category || 'Outros'] = (cats[t.category || 'Outros'] || 0) + Number(t.amount || 0); });
+            const donutData = Object.entries(cats).map(([label, value]) => ({ label, value })).sort((a,b) => b.value - a.value);
+            el.innerHTML = `
+              <div class="section-heading"><h2>Finanças</h2><div class="row-gap-sm"><button type="button" id="f-inc" class="btn btn-secondary btn-sm">+ Receita</button><button type="button" id="f-exp" class="btn btn-primary btn-sm">− Despesa</button></div></div>
+              <div class="kpi-grid">
+                <div class="kpi-box"><span class="kpi-label">Saldo Total</span><span class="kpi-value ${bal < 0 ? 'text-danger' : 'text-accent'}">${Utils.money(bal)}</span></div>
+                <div class="kpi-box"><span class="kpi-label">Economia Mês</span><span class="kpi-value">${Utils.money(mInc - mExp)}</span></div>
+                <div class="kpi-box"><span class="kpi-label">Receitas Mês</span><span class="kpi-value text-accent">${Utils.money(mInc)}</span></div>
+                <div class="kpi-box"><span class="kpi-label">Despesas Mês</span><span class="kpi-value text-danger">${Utils.money(mExp)}</span></div>
+              </div>
+              <div class="card"><div class="card-header"><h3 class="card-title">Gastos por Categoria</h3></div><canvas id="f-donut" class="chart-canvas"></canvas></div>
+            `;
+            Utils.donut(document.getElementById('f-donut'), donutData);
+          } else if (tab === 'transactions') {
+            const list = txs.filter((t) => (fType === 'all' || t.type === fType) && (!fMonth || (t.date || '').startsWith(fMonth))).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+            el.innerHTML = `
+              <div class="section-heading"><h2>Lançamentos</h2><div class="row-gap-sm"><button type="button" id="f-inc" class="btn btn-secondary btn-sm">+ Receita</button><button type="button" id="f-exp" class="btn btn-primary btn-sm">− Despesa</button></div></div>
+              <div class="form-row">
+                <select id="ft-sel" class="input"><option value="all" ${fType==='all'?'selected':''}>Todos</option><option value="income" ${fType==='income'?'selected':''}>Receitas</option><option value="expense" ${fType==='expense'?'selected':''}>Despesas</option></select>
+                <input type="month" id="fm-inp" class="input" value="${fMonth}">
+              </div>
+              <div class="item-list">${list.length === 0 ? `<div class="card"><p class="text-secondary">Nenhum lançamento.</p></div>` : list.map((t) => `
+                <div class="list-item row-between">
+                  <div><strong>${Utils.esc(t.description)}</strong><div class="kpi-sub">${Utils.dateBR(t.date)} • ${Utils.esc(t.category || 'Outros')}</div></div>
+                  <div class="row-gap-sm"><strong class="mono ${t.type === 'income' ? 'text-accent' : 'text-danger'}">${t.type === 'income' ? '+' : '−'} ${Utils.money(t.amount)}</strong><button type="button" class="icon-btn-sm" data-dtx="${t.id}">🗑</button></div>
+                </div>`).join('')}</div>
+            `;
+            document.getElementById('ft-sel').onchange = (e) => { fType = e.target.value; this.finance(el, 'transactions'); };
+            document.getElementById('fm-inp').onchange = (e) => { fMonth = e.target.value; this.finance(el, 'transactions'); };
+            el.querySelectorAll('[data-dtx]').forEach((b) => b.onclick = async () => { if (await UI.confirm('Excluir', 'Remover lançamento?')) { await DB.delete('transactions', b.dataset.dtx); UI.render(); } });
+          } else if (tab === 'accounts') {
+            el.innerHTML = `
+              <div class="section-heading"><h2>Contas</h2><button type="button" id="f-acc" class="btn btn-primary btn-sm">+ Conta</button></div>
+              <div class="item-list">${accs.length === 0 ? `<div class="card"><p class="text-secondary">Nenhuma conta.</p></div>` : accs.map((a) => `
+                <div class="card row-between"><div><strong>${Utils.esc(a.name)}</strong><div class="kpi-sub">Saldo inicial: ${Utils.money(a.initialBalance)}</div></div><button type="button" class="icon-btn-sm" data-da="${a.id}">🗑</button></div>`).join('')}</div>
+            `;
+            document.getElementById('f-acc').onclick = () => Forms.account();
+            el.querySelectorAll('[data-da]').forEach((b) => b.onclick = async () => { if (await UI.confirm('Excluir', 'Remover conta?')) { await DB.delete('accounts', b.dataset.da); UI.render(); } });
+          } else {
+            el.innerHTML = `
+              <div class="section-heading"><h2>Orçamento</h2><button type="button" id="f-bud" class="btn btn-primary btn-sm">+ Limite</button></div>
+              <div class="item-list">${budgets.length === 0 ? `<div class="card"><p class="text-secondary">Nenhum limite definido.</p></div>` : budgets.map((b) => {
+                const spent = mTxs.filter((t) => t.type === 'expense' && t.category === b.category).reduce((s, t) => s + Number(t.amount || 0), 0);
+                const lim = Math.max(1, Number(b.monthlyLimit || 1));
+                const pct = Math.min(100, Math.round((spent / lim) * 100));
+                return `<div class="card">
+                  <div class="row-between" style="margin-bottom:6px;"><strong>${Utils.esc(b.category)}</strong><button type="button" class="icon-btn-sm" data-db="${b.id}">🗑</button></div>
+                  <div class="progress-track" style="margin-bottom:6px;"><div class="progress-fill ${spent > lim ? 'danger' : ''}" style="width:${pct}%;"></div></div>
+                  <div class="row-between"><span class="kpi-sub">${Utils.money(spent)} / ${Utils.money(lim)}</span><span class="badge">${pct}%</span></div>
+                </div>`;
+              }).join('')}</div>
+            `;
+            document.getElementById('f-bud').onclick = () => Forms.budget();
+            el.querySelectorAll('[data-db]').forEach((b) => b.onclick = async () => { if (await UI.confirm('Excluir', 'Remover orçamento?')) { await DB.delete('budgets', b.dataset.db); UI.render(); } });
+          }
+          document.getElementById('f-inc')?.addEventListener('click', () => Forms.tx('income'));
+          document.getElementById('f-exp')?.addEventListener('click', () => Forms.tx('expense'));
+        },
+
+        async goals(el) {
+          const goals = await DB.getAll('goals');
+          el.innerHTML = `
+            <div class="section-heading"><h2>Objetivos</h2><button type="button" id="new-g" class="btn btn-primary btn-sm">+ Meta</button></div>
+            <div class="item-list">${goals.length === 0 ? `<div class="card"><p class="text-secondary">Nenhum objetivo cadastrado.</p></div>` : goals.map((g) => {
+              const target = Math.max(1, Number(g.targetValue || 1)), cur = Math.max(0, Number(g.currentValue || 0));
+              const pct = Math.min(100, Math.round((cur / target) * 100));
+              return `<div class="card">
+                <div class="row-between" style="margin-bottom:6px;">
+                  <div><span class="badge badge-info">${Utils.esc(g.category || 'Geral')}</span><h3 style="margin-top:4px;">${Utils.esc(g.name)}</h3></div>
+                  <div class="row-gap-sm"><button type="button" class="btn btn-secondary btn-sm" data-gp="${g.id}">+ Avanço</button><button type="button" class="icon-btn-sm" data-dg="${g.id}">🗑</button></div>
+                </div>
+                <div class="row-between" style="margin-bottom:4px;"><span class="kpi-sub mono">${cur} / ${target} ${Utils.esc(g.unit || '')}</span><strong class="text-accent mono">${pct}%</strong></div>
+                <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
+              </div>`;
+            }).join('')}</div>
+          `;
+          document.getElementById('new-g').onclick = () => Forms.goal();
+          el.querySelectorAll('[data-gp]').forEach((b) => b.onclick = async () => {
+            const g = await DB.get('goals', b.dataset.gp);
+            if (!g) return;
+            const body = UI.modal(`Atualizar • ${g.name}`, `<form id="gpf" class="form-stack"><div class="form-group"><label>Valor atual (Meta: ${g.targetValue})</label><input type="number" id="gpv" class="input" step="any" value="${g.currentValue}" required></div><button type="submit" class="btn btn-primary btn-block">Salvar</button></form>`);
+            body.querySelector('#gpf').onsubmit = async (e) => { e.preventDefault(); g.currentValue = Number(body.querySelector('#gpv').value) || 0; await DB.put('goals', g); UI.closeModal(); UI.render(); };
+          });
+          el.querySelectorAll('[data-dg]').forEach((b) => b.onclick = async () => { if (await UI.confirm('Excluir', 'Remover meta?')) { await DB.delete('goals', b.dataset.dg); UI.render(); } });
+        },
+
+        async notes(el) {
+          const notes = (await DB.getAll('notes')).sort((a,b) => Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)));
+          el.innerHTML = `
+            <div class="section-heading"><h2>Notas</h2><button type="button" id="new-n" class="btn btn-primary btn-sm">+ Nota</button></div>
+            <div class="item-list">${notes.length === 0 ? `<div class="card"><p class="text-secondary">Nenhuma nota.</p></div>` : notes.map((n) => `
+              <div class="card">
+                <div class="row-between" style="margin-bottom:6px;"><strong>${n.pinned ? '📌 ' : ''}${Utils.esc(n.title)}</strong><button type="button" class="icon-btn-sm" data-dn="${n.id}">🗑</button></div>
+                <p class="text-secondary" style="white-space:pre-line;font-size:13.5px;">${Utils.esc(n.content)}</p>
+              </div>`).join('')}</div>
+          `;
+          document.getElementById('new-n').onclick = () => Forms.note();
+          el.querySelectorAll('[data-dn]').forEach((b) => b.onclick = async () => { if (await UI.confirm('Excluir', 'Remover nota?')) { await DB.delete('notes', b.dataset.dn); UI.render(); } });
+        },
+
+        async projects(el) {
+          const projs = await DB.getAll('projects');
+          el.innerHTML = `
+            <div class="section-heading"><h2>Projetos</h2><button type="button" id="new-p" class="btn btn-primary btn-sm">+ Projeto</button></div>
+            <div class="item-list">${projs.length === 0 ? `<div class="card"><p class="text-secondary">Nenhum projeto.</p></div>` : projs.map((p) => `
+              <div class="card">
+                <div class="row-between" style="margin-bottom:6px;"><div><span class="badge badge-info">${Utils.esc(p.status)}</span><h3 style="margin-top:4px;">${Utils.esc(p.name)}</h3></div><button type="button" class="icon-btn-sm" data-dp="${p.id}">🗑</button></div>
+                <p class="text-secondary" style="font-size:13px;">${Utils.esc(p.description || '')}</p>
+              </div>`).join('')}</div>
+          `;
+          document.getElementById('new-p').onclick = () => Forms.project();
+          el.querySelectorAll('[data-dp]').forEach((b) => b.onclick = async () => { if (await UI.confirm('Excluir', 'Remover projeto?')) { await DB.delete('projects', b.dataset.dp); UI.render(); } });
+        },
+
+        async reports(el) {
+          const [tasks, txs, goals] = await Promise.all([DB.getAll('tasks'), DB.getAll('transactions'), DB.getAll('goals')]);
+          const done = tasks.filter((t) => t.completed).length;
+          const rate = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
+          el.innerHTML = `
+            <div class="section-heading"><h2>Relatórios</h2></div>
+            <div class="kpi-grid">
+              <div class="kpi-box"><span class="kpi-label">Conclusão Tarefas</span><span class="kpi-value text-accent">${rate}%</span></div>
+              <div class="kpi-box"><span class="kpi-label">Total Lançamentos</span><span class="kpi-value">${txs.length}</span></div>
+              <div class="kpi-box"><span class="kpi-label">Metas Cadastradas</span><span class="kpi-value">${goals.length}</span></div>
+              <div class="kpi-box"><span class="kpi-label">Tarefas Totais</span><span class="kpi-value">${tasks.length}</span></div>
+            </div>
+          `;
+        },
+
+        async settings(el) {
+          const p = Prefs.getAll();
+          el.innerHTML = `
+            <div class="section-heading"><h2>Configurações</h2></div>
+            <form id="set-f" class="card form-stack">
+              <div class="form-group"><label>Seu nome</label><input type="text" id="sn-inp" class="input" value="${Utils.esc(p.userName)}" required></div>
+              <div class="form-row">
+                <div class="form-group"><label>Moeda</label><select id="sc-inp" class="input"><option value="BRL" ${p.currency==='BRL'?'selected':''}>Real (R$)</option><option value="USD" ${p.currency==='USD'?'selected':''}>Dólar (US$)</option><option value="EUR" ${p.currency==='EUR'?'selected':''}>Euro (€)</option></select></div>
+                <div class="form-group"><label>Tema</label><select id="st-inp" class="input"><option value="dark" ${p.theme==='dark'?'selected':''}>Dark</option><option value="oled" ${p.theme==='oled'?'selected':''}>OLED</option><option value="light" ${p.theme==='light'?'selected':''}>Claro</option></select></div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Salvar Preferências</button>
+            </form>
+            <div class="card form-stack">
+              <h3 class="card-title">Backup Local</h3>
+              <button type="button" id="btn-exp" class="btn btn-secondary btn-block">Exportar Backup JSON</button>
+              <button type="button" id="btn-rst" class="btn btn-danger-soft btn-block">Apagar Todos os Dados</button>
+            </div>
+          `;
+          document.getElementById('set-f').onsubmit = (e) => {
+            e.preventDefault();
+            Prefs.set('userName', document.getElementById('sn-inp').value.trim() || 'Usuário');
+            Prefs.set('currency', document.getElementById('sc-inp').value);
+            Prefs.set('theme', document.getElementById('st-inp').value);
+            App.refreshHeader();
+            UI.toast('Preferências salvas!');
+          };
+          document.getElementById('btn-exp').onclick = async () => {
+            const data = {};
+            for (const s of STORES) data[s] = await DB.getAll(s);
+            const blob = new Blob([JSON.stringify({ app: 'LifeOS', exportedAt: new Date().toISOString(), prefs: Prefs.getAll(), data }, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `lifeos-backup-${Utils.todayISO()}.json`; a.click();
+          };
+          document.getElementById('btn-rst').onclick = async () => {
+            if (await UI.confirm('Apagar tudo', 'Deseja apagar todos os dados locais?')) { await DB.clearAll(); Prefs.reset(); location.reload(); }
+          };
+        }
+      };
+
+      const Forms = {
+        task() {
+          const b = UI.modal('Nova Tarefa', `<form id="f-tk" class="form-stack"><div class="form-group"><label>Título *</label><input id="tk-t" class="input" required></div><div class="form-row"><div class="form-group"><label>Data</label><input type="date" id="tk-d" class="input" value="${Utils.todayISO()}"></div><div class="form-group"><label>Prioridade</label><select id="tk-p" class="input"><option>Média</option><option>Alta</option><option>Urgente</option><option>Baixa</option></select></div></div><button type="submit" class="btn btn-primary btn-block">Salvar</button></form>`);
+          b.querySelector('#f-tk').onsubmit = async (e) => {
+            e.preventDefault();
+            await DB.put('tasks', { id: Utils.uid('t'), title: b.querySelector('#tk-t').value.trim(), dueDate: b.querySelector('#tk-d').value, priority: b.querySelector('#tk-p').value, completed: false });
+            UI.closeModal(); UI.toast('Tarefa criada!'); UI.render();
+          };
+        },
+        event(dt) {
+          const b = UI.modal('Novo Compromisso', `<form id="f-ev" class="form-stack"><div class="form-group"><label>Título *</label><input id="ev-t" class="input" required></div><div class="form-row"><div class="form-group"><label>Data</label><input type="date" id="ev-d" class="input" value="${dt || Utils.todayISO()}"></div><div class="form-group"><label>Hora</label><input type="time" id="ev-h" class="input" value="09:00"></div></div><div class="form-group"><label>Local</label><input id="ev-l" class="input"></div><button type="submit" class="btn btn-primary btn-block">Salvar</button></form>`);
+          b.querySelector('#f-ev').onsubmit = async (e) => {
+            e.preventDefault();
+            await DB.put('events', { id: Utils.uid('e'), title: b.querySelector('#ev-t').value.trim(), startDate: b.querySelector('#ev-d').value, startTime: b.querySelector('#ev-h').value, location: b.querySelector('#ev-l').value.trim() });
+            UI.closeModal(); UI.toast('Compromisso salvo!'); UI.render();
+          };
+        },
+        habit() {
+          const b = UI.modal('Novo Hábito', `<form id="f-hb" class="form-stack"><div class="form-group"><label>Nome *</label><input id="hb-n" class="input" required></div><div class="form-row"><div class="form-group"><label>Meta diária</label><input type="number" id="hb-t" class="input" min="1" value="1"></div><div class="form-group"><label>Unidade</label><input id="hb-u" class="input" value="vez"></div></div><button type="submit" class="btn btn-primary btn-block">Salvar</button></form>`);
+          b.querySelector('#f-hb').onsubmit = async (e) => {
+            e.preventDefault();
+            await DB.put('habits', { id: Utils.uid('h'), name: b.querySelector('#hb-n').value.trim(), dailyTarget: Number(b.querySelector('#hb-t').value) || 1, unit: b.querySelector('#hb-u').value.trim() || 'vez' });
+            UI.closeModal(); UI.toast('Hábito salvo!'); UI.render();
+          };
+        },
+        tx(type) {
+          const isInc = type === 'income';
+          const cats = isInc ? ['Salário', 'Freelance', 'Investimentos', 'Outros'] : ['Alimentação', 'Moradia', 'Transporte', 'Saúde', 'Lazer', 'Compras', 'Outros'];
+          const b = UI.modal(isInc ? 'Nova Receita' : 'Nova Despesa', `<form id="f-tx" class="form-stack"><div class="form-group"><label>Descrição *</label><input id="tx-d" class="input" required></div><div class="form-row"><div class="form-group"><label>Valor *</label><input type="number" id="tx-v" class="input" step="0.01" min="0.01" required></div><div class="form-group"><label>Data</label><input type="date" id="tx-dt" class="input" value="${Utils.todayISO()}"></div></div><div class="form-group"><label>Categoria</label><select id="tx-c" class="input">${cats.map((c) => `<option>${c}</option>`).join('')}</select></div><button type="submit" class="btn btn-primary btn-block">Salvar</button></form>`);
+          b.querySelector('#f-tx').onsubmit = async (e) => {
+            e.preventDefault();
+            await DB.put('transactions', { id: Utils.uid('tx'), type, description: b.querySelector('#tx-d').value.trim(), amount: parseFloat(b.querySelector('#tx-v').value), date: b.querySelector('#tx-dt').value, category: b.querySelector('#tx-c').value });
+            UI.closeModal(); UI.toast('Lançamento salvo!'); UI.render();
+          };
+        },
+        account() {
+          const b = UI.modal('Nova Conta', `<form id="f-ac" class="form-stack"><div class="form-group"><label>Nome *</label><input id="ac-n" class="input" required></div><div class="form-group"><label>Saldo inicial</label><input type="number" id="ac-b" class="input" step="0.01" value="0"></div><button type="submit" class="btn btn-primary btn-block">Salvar</button></form>`);
+          b.querySelector('#f-ac').onsubmit = async (e) => {
+            e.preventDefault();
+            await DB.put('accounts', { id: Utils.uid('ac'), name: b.querySelector('#ac-n').value.trim(), initialBalance: parseFloat(b.querySelector('#ac-b').value) || 0 });
+            UI.closeModal(); UI.render();
+          };
+        },
+        budget() {
+          const cats = ['Alimentação', 'Moradia', 'Transporte', 'Saúde', 'Lazer', 'Compras', 'Outros'];
+          const b = UI.modal('Novo Limite', `<form id="f-bd" class="form-stack"><div class="form-group"><label>Categoria</label><select id="bd-c" class="input">${cats.map((c) => `<option>${c}</option>`).join('')}</select></div><div class="form-group"><label>Limite Mensal *</label><input type="number" id="bd-l" class="input" step="0.01" min="1" required></div><button type="submit" class="btn btn-primary btn-block">Salvar</button></form>`);
+          b.querySelector('#f-bd').onsubmit = async (e) => {
+            e.preventDefault();
+            const category = b.querySelector('#bd-c').value;
+            await DB.put('budgets', { id: `b_${category}`, category, monthlyLimit: parseFloat(b.querySelector('#bd-l').value) || 0 });
+            UI.closeModal(); UI.render();
+          };
+        },
+        goal() {
+          const b = UI.modal('Novo Objetivo', `<form id="f-gl" class="form-stack"><div class="form-group"><label>Nome *</label><input id="gl-n" class="input" required></div><div class="form-row"><div class="form-group"><label>Meta *</label><input type="number" id="gl-t" class="input" min="1" value="100" required></div><div class="form-group"><label>Unidade</label><input id="gl-u" class="input" value="%"></div></div><button type="submit" class="btn btn-primary btn-block">Salvar</button></form>`);
+          b.querySelector('#f-gl').onsubmit = async (e) => {
+            e.preventDefault();
+            await DB.put('goals', { id: Utils.uid('g'), name: b.querySelector('#gl-n').value.trim(), category: 'Pessoais', targetValue: Number(b.querySelector('#gl-t').value) || 100, currentValue: 0, unit: b.querySelector('#gl-u').value.trim() });
+            UI.closeModal(); UI.toast('Objetivo criado!'); UI.render();
+          };
+        },
+        note() {
+          const b = UI.modal('Nova Nota', `<form id="f-nt" class="form-stack"><div class="form-group"><label>Título *</label><input id="nt-t" class="input" required></div><div class="form-group"><label>Conteúdo *</label><textarea id="nt-c" class="input" required></textarea></div><button type="submit" class="btn btn-primary btn-block">Salvar</button></form>`);
+          b.querySelector('#f-nt').onsubmit = async (e) => {
+            e.preventDefault();
+            await DB.put('notes', { id: Utils.uid('n'), title: b.querySelector('#nt-t').value.trim(), content: b.querySelector('#nt-c').value.trim(), pinned: false, updatedAt: new Date().toISOString() });
+            UI.closeModal(); UI.toast('Nota salva!'); UI.render();
+          };
+        },
+        project() {
+          const b = UI.modal('Novo Projeto', `<form id="f-pj" class="form-stack"><div class="form-group"><label>Nome *</label><input id="pj-n" class="input" required></div><div class="form-group"><label>Descrição</label><textarea id="pj-d" class="input"></textarea></div><button type="submit" class="btn btn-primary btn-block">Salvar</button></form>`);
+          b.querySelector('#f-pj').onsubmit = async (e) => {
+            e.preventDefault();
+            await DB.put('projects', { id: Utils.uid('p'), name: b.querySelector('#pj-n').value.trim(), status: 'Em andamento', description: b.querySelector('#pj-d').value.trim() });
+            UI.closeModal(); UI.toast('Projeto criado!'); UI.render();
+          };
+        }
+      };
+
+      const App = {
+        async init() {
+          try {
+            await DB.init();
+            this.refreshHeader();
+            this.bind();
+            if (!Prefs.get('onboarded')) document.getElementById('onboarding-screen').classList.remove('hidden');
+            else UI.go('dashboard');
+          } catch (err) {
+            document.getElementById('main-content').innerHTML = `<div class="card"><p class="text-danger">Erro ao iniciar: ${Utils.esc(err && err.message || err)}</p></div>`;
+          }
+        },
+        refreshHeader() {
+          const p = Prefs.getAll();
+          document.documentElement.setAttribute('data-theme', p.theme || 'dark');
+          const name = p.userName || 'Usuário';
+          document.getElementById('header-greeting').textContent = `Olá, ${name}`;
+          document.getElementById('header-avatar').textContent = name.charAt(0).toUpperCase();
+          document.getElementById('header-date').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' });
+        },
+        bind() {
+          document.getElementById('onboarding-form').onsubmit = async (e) => {
+            e.preventDefault();
+            Prefs.set('userName', document.getElementById('ob-name').value.trim());
+            Prefs.set('currency', document.getElementById('ob-currency').value);
+            Prefs.set('theme', document.getElementById('ob-theme').value);
+            Prefs.set('onboarded', true);
+            if (document.getElementById('ob-demo').checked) await DB.seedDemo();
+            document.getElementById('onboarding-screen').classList.add('hidden');
+            this.refreshHeader();
+            UI.go('dashboard');
+          };
+          document.querySelectorAll('#bottom-nav .nav-item').forEach((b) => b.onclick = () => UI.go(b.dataset.section));
+          document.getElementById('btn-settings').onclick = () => UI.go('settings');
+          document.getElementById('header-profile-trigger').onclick = () => UI.go('settings');
+          document.getElementById('close-modal').onclick = () => UI.closeModal();
+
+          const qc = document.getElementById('quick-capture-backdrop');
+          document.getElementById('fab-quick-capture').onclick = () => qc.classList.remove('hidden');
+          document.getElementById('close-quick-capture').onclick = () => qc.classList.add('hidden');
+          document.querySelectorAll('[data-quick]').forEach((b) => b.onclick = () => {
+            qc.classList.add('hidden');
+            const q = b.dataset.quick;
+            if (q === 'task') Forms.task();
+            else if (q === 'event') Forms.event();
+            else if (q === 'expense') Forms.tx('expense');
+            else if (q === 'income') Forms.tx('income');
+            else if (q === 'note') Forms.note();
+            else if (q === 'goal') Forms.goal();
+          });
+
+          const so = document.getElementById('search-overlay'), si = document.getElementById('global-search-input');
+          document.getElementById('btn-global-search').onclick = () => { so.classList.remove('hidden'); si.value = ''; document.getElementById('global-search-results').innerHTML = ''; };
+          document.getElementById('close-global-search').onclick = () => so.classList.add('hidden');
+          si.oninput = async () => {
+            const q = si.value.trim().toLowerCase(), res = document.getElementById('global-search-results');
+            if (!q) { res.innerHTML = ''; return; }
+            const [tasks, notes, txs] = await Promise.all([DB.getAll('tasks'), DB.getAll('notes'), DB.getAll('transactions')]);
+            const hits = [
+              ...tasks.filter((t) => (t.title||'').toLowerCase().includes(q)).map((t) => ({ tag: 'Tarefa', title: t.title, go: 'planning:tasks' })),
+              ...notes.filter((n) => (n.title||'').toLowerCase().includes(q)).map((n) => ({ tag: 'Nota', title: n.title, go: 'library:notes' })),
+              ...txs.filter((t) => (t.description||'').toLowerCase().includes(q)).map((t) => ({ tag: 'Finanças', title: t.description, go: 'finance:transactions' }))
+            ];
+            res.innerHTML = hits.length ? hits.map((h) => `<div class="card-subtle row-between" data-sgo="${h.go}"><strong>${Utils.esc(h.title)}</strong><span class="badge">${h.tag}</span></div>`).join('') : '<p class="text-secondary">Nada encontrado.</p>';
+            res.querySelectorAll('[data-sgo]').forEach((x) => x.onclick = () => { so.classList.add('hidden'); const [a, b] = x.dataset.sgo.split(':'); UI.go(a, b); });
+          };
+
+          const no = document.getElementById('notifications-overlay');
+          document.getElementById('btn-notifications').onclick = async () => {
+            const tasks = await DB.getAll('tasks'), today = Utils.todayISO();
+            const late = tasks.filter((t) => !t.completed && t.dueDate && t.dueDate < today);
+            document.getElementById('notifications-list').innerHTML = late.length
+              ? `<div class="item-list">${late.map((t) => `<div class="card-subtle"><strong>Atrasada: ${Utils.esc(t.title)}</strong></div>`).join('')}</div>`
+              : '<p class="text-secondary">Nenhum alerta pendente.</p>';
+            no.classList.remove('hidden');
+          };
+          document.getElementById('close-notifications').onclick = () => no.classList.add('hidden');
+        }
+      };
+
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => App.init());
+      else App.init();
+    })();
+  </script>
+</body>
+</html>
